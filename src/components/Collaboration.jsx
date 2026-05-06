@@ -13,13 +13,13 @@ import {
   useEnums,
   useNotes,
   useSaveState,
-  useTransform,
+  useSelect,
   useTypes,
   useUndoRedo,
 } from "../hooks";
 import { useTranslation } from "react-i18next";
 
-const SCALAR_KEYS = ["title", "database", "transform"];
+const SCALAR_KEYS = ["title", "database"];
 const COLLECTIONS = [
   { stateKey: "tables", mapKey: "tablesById", orderKey: "tableOrder" },
   {
@@ -68,7 +68,6 @@ function getSharedState(sharedDiagram) {
   const state = {
     title: sharedDiagram.get("title") || "Untitled Diagram",
     database,
-    transform: sharedDiagram.get("transform") || { zoom: 1, pan: { x: 0, y: 0 } },
   };
 
   for (const collection of COLLECTIONS) {
@@ -164,7 +163,7 @@ export default function Collaboration({ title, setTitle }) {
   const lastCursorSentAtRef = useRef(0);
   const { coords, pointer } = useCanvas();
   const { setSaveState } = useSaveState();
-  const { transform, setTransform } = useTransform();
+  const { selectedElement, bulkSelectedElements, setRemoteSelections } = useSelect();
   const {
     tables,
     relationships,
@@ -187,7 +186,6 @@ export default function Collaboration({ title, setTitle }) {
       relationships,
       notes,
       subjectAreas: areas,
-      transform,
       ...(databases[database]?.hasTypes && { types }),
       ...(databases[database]?.hasEnums && { enums }),
     }),
@@ -199,7 +197,6 @@ export default function Collaboration({ title, setTitle }) {
       relationships,
       tables,
       title,
-      transform,
       types,
     ],
   );
@@ -223,7 +220,6 @@ export default function Collaboration({ title, setTitle }) {
       setRelationships(state.relationships || []);
       setNotes(state.notes || []);
       setAreas(state.subjectAreas || []);
-      setTransform(state.transform || { zoom: 1, pan: { x: 0, y: 0 } });
       setTypes(state.types || []);
       setEnums(state.enums || []);
       setUndoStack([]);
@@ -244,7 +240,6 @@ export default function Collaboration({ title, setTitle }) {
       setSaveState,
       setTables,
       setTitle,
-      setTransform,
       setTypes,
       setUndoStack,
     ],
@@ -327,20 +322,32 @@ export default function Collaboration({ title, setTitle }) {
     const handleAwarenessChange = () => {
       const states = [...provider.awareness.getStates().values()];
       setPeers(states.length || 1);
-      setRemoteCursors(
-        states.reduce((acc, state) => {
-          if (!state?.user || state.user.clientId === clientId) return acc;
-          if (!state.cursor) return acc;
 
-          acc[state.user.clientId] = {
+      const selections = [];
+      const cursors = {};
+
+      states.forEach((state) => {
+        if (!state?.user || state.user.clientId === clientId) return;
+
+        if (state.selection) {
+          selections.push({
+            user: state.user,
+            selection: state.selection,
+          });
+        }
+
+        if (state.cursor) {
+          cursors[state.user.clientId] = {
             ...state.cursor,
             color: state.user.color,
             label: state.user.label,
             updatedAt: Date.now(),
           };
-          return acc;
-        }, {}),
-      );
+        }
+      });
+
+      setRemoteCursors(cursors);
+      setRemoteSelections(selections);
     };
 
     provider.on("status", handleStatus);
@@ -364,6 +371,7 @@ export default function Collaboration({ title, setTitle }) {
     clientId,
     collaborationUrl,
     roomId,
+    setRemoteSelections,
     writeSharedState,
   ]);
 
@@ -391,6 +399,15 @@ export default function Collaboration({ title, setTitle }) {
       pointer.spaces.diagram,
     );
   }, [pointer.spaces.diagram, roomId]);
+
+  useEffect(() => {
+    if (!roomId || !providerRef.current) return;
+
+    providerRef.current.awareness.setLocalStateField("selection", {
+      selectedElement,
+      bulkSelectedElements,
+    });
+  }, [selectedElement, bulkSelectedElements, roomId]);
 
   if (!roomId) return null;
 

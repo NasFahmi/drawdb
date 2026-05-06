@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Button, Popover, Input } from "@douyinfe/semi-ui";
+import { Button, Popover, Input, Tag } from "@douyinfe/semi-ui";
 import ColorPicker from "../EditorSidePanel/ColorPicker";
 import {
   IconEdit,
@@ -36,6 +36,7 @@ export default function Area({
     setSelectedElement,
     bulkSelectedElements,
     setBulkSelectedElements,
+    remoteSelections,
   } = useSelect();
 
   const handleResize = (e, dir) => {
@@ -144,6 +145,20 @@ export default function Area({
     );
   }, [selectedElement, data, bulkSelectedElements]);
 
+  const remoteSelectors = useMemo(() => {
+    if (!remoteSelections) return [];
+    return remoteSelections.filter(rs => {
+      const rsSel = rs.selection?.selectedElement;
+      const rsBulk = rs.selection?.bulkSelectedElements;
+      return (rsSel?.id == data.id && rsSel?.element === ObjectType.AREA) ||
+             (rsBulk?.some(e => e.type === ObjectType.AREA && e.id === data.id));
+    }).map(rs => rs.user);
+  }, [remoteSelections, data.id]);
+
+  const isRemoteSelected = remoteSelectors.length > 0;
+  const remoteColor = isRemoteSelected ? remoteSelectors[0].color : null;
+  const remoteLabel = isRemoteSelected ? remoteSelectors[0].label : null;
+
   return (
     <g ref={ref}>
       <foreignObject
@@ -160,14 +175,21 @@ export default function Area({
               ? "border-dashed border-blue-500"
               : isSelected
                 ? "border-blue-500 opacity-100"
-                : "border-slate-400 opacity-100"
+                : isRemoteSelected
+                  ? "opacity-100 border-solid"
+                  : "border-slate-400 opacity-100"
           }`}
-          style={{ backgroundColor: `${data.color}66` }}
+          style={{ backgroundColor: `${data.color}66`, ...(isRemoteSelected && !isSelected && !isHovered ? { borderColor: remoteColor } : {}) }}
           onDoubleClick={edit}
         >
           <div className="flex justify-between gap-1 w-full">
-            <div className="text-color select-none overflow-hidden text-ellipsis">
+            <div className="text-color select-none overflow-hidden text-ellipsis flex items-center gap-2">
               {data.name}
+              {isRemoteSelected && !isSelected && (
+                <Tag size="small" style={{ backgroundColor: remoteColor, color: "white", border: "none" }}>
+                  {remoteLabel}
+                </Tag>
+              )}
             </div>
             {(isHovered || (areaIsOpen() && !layout.sidebar)) && (
               <div className="flex items-center gap-1.5">

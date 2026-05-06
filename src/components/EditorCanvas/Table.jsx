@@ -45,6 +45,7 @@ export default function Table({
     setSelectedElement,
     bulkSelectedElements,
     setBulkSelectedElements,
+    remoteSelections,
   } = useSelect();
 
   const borderColor = useMemo(
@@ -67,6 +68,20 @@ export default function Table({
       )
     );
   }, [selectedElement, tableData, bulkSelectedElements]);
+
+  const remoteSelectors = useMemo(() => {
+    if (!remoteSelections) return [];
+    return remoteSelections.filter(rs => {
+      const rsSel = rs.selection?.selectedElement;
+      const rsBulk = rs.selection?.bulkSelectedElements;
+      return (rsSel?.id == tableData.id && rsSel?.element === ObjectType.TABLE) ||
+             (rsBulk?.some(e => e.type === ObjectType.TABLE && e.id === tableData.id));
+    }).map(rs => rs.user);
+  }, [remoteSelections, tableData.id]);
+
+  const isRemoteSelected = remoteSelectors.length > 0;
+  const remoteColor = isRemoteSelected ? remoteSelectors[0].color : null;
+  const remoteLabel = isRemoteSelected ? remoteSelectors[0].label : null;
 
   const lockUnlockTable = (e) => {
     const locking = !tableData.locked;
@@ -156,8 +171,8 @@ export default function Table({
                  settings.mode === "light"
                    ? "bg-zinc-100 text-zinc-800"
                    : "bg-zinc-800 text-zinc-200"
-               } ${isSelected ? "border-solid border-blue-500" : borderColor}`}
-          style={{ direction: "ltr" }}
+               } ${isSelected ? "border-solid border-blue-500" : (isRemoteSelected ? "border-solid" : borderColor)}`}
+          style={{ direction: "ltr", ...(isRemoteSelected && !isSelected ? { borderColor: remoteColor } : {}) }}
         >
           <div
             className="h-[10px] w-full rounded-t-md"
@@ -171,8 +186,13 @@ export default function Table({
             <div
               className={`overflow-hidden font-bold h-[40px] flex justify-between items-center`}
             >
-              <div className="px-3 overflow-hidden text-ellipsis whitespace-nowrap">
+              <div className="px-3 overflow-hidden text-ellipsis whitespace-nowrap flex items-center gap-2">
                 {tableData.name}
+                {isRemoteSelected && !isSelected && (
+                  <Tag size="small" style={{ backgroundColor: remoteColor, color: "white", border: "none" }}>
+                    {remoteLabel}
+                  </Tag>
+                )}
               </div>
               <div className="hidden group-hover:block">
                 <div className="flex justify-end items-center mx-2 space-x-1.5">

@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Action, ObjectType, Tab, State } from "../../data/constants";
-import { Input, Button, Popover } from "@douyinfe/semi-ui";
+import { Input, Button, Popover, Tag } from "@douyinfe/semi-ui";
 import ColorPicker from "../EditorSidePanel/ColorPicker";
 import {
   IconEdit,
@@ -38,6 +38,7 @@ export default function Note({ data, onPointerDown }) {
     setSelectedElement,
     bulkSelectedElements,
     setBulkSelectedElements,
+    remoteSelections,
   } = useSelect();
   const initialColorRef = useRef(data.color);
 
@@ -181,6 +182,20 @@ export default function Note({ data, onPointerDown }) {
     );
   }, [selectedElement, data, bulkSelectedElements]);
 
+  const remoteSelectors = useMemo(() => {
+    if (!remoteSelections) return [];
+    return remoteSelections.filter(rs => {
+      const rsSel = rs.selection?.selectedElement;
+      const rsBulk = rs.selection?.bulkSelectedElements;
+      return (rsSel?.id == data.id && rsSel?.element === ObjectType.NOTE) ||
+             (rsBulk?.some(e => e.type === ObjectType.NOTE && e.id === data.id));
+    }).map(rs => rs.user);
+  }, [remoteSelections, data.id]);
+
+  const isRemoteSelected = remoteSelectors.length > 0;
+  const remoteColor = isRemoteSelected ? remoteSelectors[0].color : null;
+  const remoteLabel = isRemoteSelected ? remoteSelectors[0].label : null;
+
   const width = data.width ?? noteWidth;
   const MIN_NOTE_WIDTH = 120;
 
@@ -225,7 +240,9 @@ export default function Note({ data, onPointerDown }) {
             ? "rgb(59 130 246)"
             : isSelected
               ? "rgb(59 130 246)"
-              : "rgb(168 162 158)"
+              : isRemoteSelected
+                ? remoteColor
+                : "rgb(168 162 158)"
         }
         strokeDasharray={hovered ? 5 : 0}
         strokeLinejoin="round"
@@ -243,7 +260,9 @@ export default function Note({ data, onPointerDown }) {
             ? "rgb(59 130 246)"
             : isSelected
               ? "rgb(59 130 246)"
-              : "rgb(168 162 158)"
+              : isRemoteSelected
+                ? remoteColor
+                : "rgb(168 162 158)"
         }
         strokeDasharray={hovered ? 5 : 0}
         strokeLinejoin="round"
@@ -395,9 +414,14 @@ export default function Note({ data, onPointerDown }) {
           <div className="flex justify-between gap-1 w-full">
             <label
               htmlFor={`note_${data.id}`}
-              className="ms-5 overflow-hidden text-ellipsis"
+              className="ms-5 overflow-hidden text-ellipsis flex items-center gap-2"
             >
               {data.title}
+              {isRemoteSelected && !isSelected && (
+                <Tag size="small" style={{ backgroundColor: remoteColor, color: "white", border: "none" }}>
+                  {remoteLabel}
+                </Tag>
+              )}
             </label>
             {(hovered ||
               (selectedElement.element === ObjectType.NOTE &&

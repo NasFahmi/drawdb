@@ -14,6 +14,7 @@ export default function SelectContextProvider({ children }) {
     openFromToolbar: false, // this is to handle triggering onClickOutside when sidebar is disabled
   });
   const [bulkSelectedElements, setBulkSelectedElements] = useState([]);
+  const [remoteSelections, setRemoteSelections] = useState([]);
 
   return (
     <SelectContext.Provider
@@ -22,6 +23,8 @@ export default function SelectContextProvider({ children }) {
         setSelectedElement,
         bulkSelectedElements,
         setBulkSelectedElements,
+        remoteSelections,
+        setRemoteSelections,
       }}
     >
       {children}
