@@ -249,6 +249,21 @@ const id = {
       "Mendeklarasikan indeks tanpa nama dalam tabel '{{tableName}}'",
     didnt_find_diagram: "Ups! Tidak menemukan diagram.",
     dbml_view: "Tampilan DBML",
+    share: "Bagikan",
+    unshare: "Berhenti bagikan",
+    copy_link: "Salin tautan",
+    readme: "README",
+    failed_to_load: "Gagal memuat. Pastikan tautannya benar.",
+    share_info:
+      "* Tautan ini hanya membagikan snapshot, bukan sesi kolaborasi langsung.",
+    collaboration: "Kolaborasi",
+    collaboration_info:
+      "Buat room live agar semua orang dengan tautan ini bisa mengedit diagram bersama.",
+    collaboration_connected: "Kolaborasi: {{count}} online",
+    collaboration_connecting: "Menghubungkan kolaborasi...",
+    collaboration_failed: "Gagal sinkronisasi kolaborasi",
+    copy_collaboration_link: "Salin tautan kolaborasi",
+    new_room: "Room baru",
   },
 };
 

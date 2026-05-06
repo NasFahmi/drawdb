@@ -18,6 +18,7 @@ import {
   useEnums,
 } from "../hooks";
 import FloatingControls from "./FloatingControls";
+import Collaboration from "./Collaboration";
 import { Button, Modal, Tag } from "@douyinfe/semi-ui";
 import { IconAlertTriangle } from "@douyinfe/semi-icons";
 import { useTranslation } from "react-i18next";
@@ -78,6 +79,16 @@ export default function WorkSpace() {
 
   const navigate = useNavigate();
 
+  const getCollaborationSearch = useCallback(() => {
+    const collab = searchParams.get("collab");
+    return collab ? `?collab=${encodeURIComponent(collab)}` : "";
+  }, [searchParams]);
+
+  const getDiagramPath = useCallback(
+    (diagramId) => `/editor/diagrams/${diagramId}${getCollaborationSearch()}`,
+    [getCollaborationSearch],
+  );
+
   const handleResize = (e) => {
     if (!resize) return;
     const w = isRtl(i18n.language) ? window.innerWidth - e.clientX : e.clientX;
@@ -110,7 +121,7 @@ export default function WorkSpace() {
           ...(databases[database].hasTypes && { types: types }),
         })
         .then(() => {
-          navigate(`/editor/diagrams/${diagramId}`, { replace: true });
+          navigate(getDiagramPath(diagramId), { replace: true });
           setSaveState(State.SAVED);
           setLastSaved(new Date().toLocaleString());
         });
@@ -157,6 +168,7 @@ export default function WorkSpace() {
     isTemplate,
     loadedDiagramId,
     navigate,
+    getDiagramPath,
   ]);
 
   const load = useCallback(async () => {
@@ -205,7 +217,7 @@ export default function WorkSpace() {
                 ) ?? [],
               );
             }
-            navigate(`/editor/diagrams/${diagram.diagramId}`, {
+            navigate(getDiagramPath(diagram.diagramId), {
               replace: true,
             });
           } else {
@@ -364,7 +376,7 @@ export default function WorkSpace() {
           mergeCustomTypes(parsedDiagram.customTypes);
         }
         if (diagramId) {
-          navigate(`/editor/diagrams/${diagramId}`, {
+          navigate(getDiagramPath(diagramId), {
             replace: true,
           });
         }
@@ -414,6 +426,7 @@ export default function WorkSpace() {
     setSaveState,
     searchParams,
     navigate,
+    getDiagramPath,
     isDiagram,
     isTemplate,
     loadedDiagramId,
@@ -495,6 +508,7 @@ export default function WorkSpace() {
           <CanvasContextProvider className="h-full w-full">
             <Canvas saveState={saveState} setSaveState={setSaveState} />
           </CanvasContextProvider>
+          <Collaboration title={title} setTitle={setTitle} />
           {version && (
             <div className="absolute right-8 top-2 space-x-2">
               <Button

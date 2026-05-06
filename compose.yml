@@ -1,16 +1,39 @@
 services:
   drawdb:
-    image: node:20-alpine
+    image: oven/bun:1-alpine
     container_name: drawdb
     ports:
       - 5173:5173
     working_dir: /var/www/html
     volumes:
       - ./:/var/www/html
-    command: sh -c "npm install && npm run dev -- --host"
+      - drawdb_node_modules:/var/www/html/node_modules
+    command: sh -c "bun install && bun run dev --host 0.0.0.0 --port 5173"
+    depends_on:
+      - drawdb-collaboration
+    networks:
+      - default
+
+  drawdb-collaboration:
+    image: oven/bun:1-alpine
+    container_name: drawdb-collaboration
+    ports:
+      - 5174:5174
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - drawdb_collaboration_node_modules:/var/www/html/node_modules
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5174
+    command: sh -c "bun install && bun run collaboration"
     networks:
       - default
 
 networks:
   default:
     driver: bridge
+
+volumes:
+  drawdb_node_modules:
+  drawdb_collaboration_node_modules:

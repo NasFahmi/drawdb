@@ -236,6 +236,14 @@ const en = {
     share: "Share",
     unshare: "Unshare",
     copy_link: "Copy link",
+    collaboration: "Collaboration",
+    collaboration_info:
+      "Create a live room so everyone with the link can edit this diagram together.",
+    collaboration_connected: "Collaboration: {{count}} online",
+    collaboration_connecting: "Connecting collaboration...",
+    collaboration_failed: "Failed to sync collaboration",
+    copy_collaboration_link: "Copy collaboration link",
+    new_room: "New room",
     readme: "README",
     failed_to_load: "Failed to load. Make sure the link is correct.",
     share_info:

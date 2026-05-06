@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "collaboration": "bunx y-websocket",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
@@ -41,7 +42,9 @@
     "react-i18next": "^14.1.1",
     "react-router-dom": "^6.30.3",
     "react-tweet": "^3.2.1",
-    "usehooks-ts": "^3.1.0"
+    "usehooks-ts": "^3.1.0",
+    "y-websocket": "2.0.4",
+    "yjs": "^13.6.27"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.14",

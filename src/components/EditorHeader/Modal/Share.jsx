@@ -15,6 +15,8 @@ import { databases } from "../../../data/databases";
 import { MODAL } from "../../../data/constants";
 import { create, patch, SHARE_FILENAME } from "../../../api/gists";
 import { getCustomTypes } from "../../../utils/customTypes";
+import { useSearchParams } from "react-router-dom";
+import { nanoid } from "nanoid";
 
 export default function Share({ title, setModal }) {
   const { t } = useTranslation();
@@ -27,7 +29,14 @@ export default function Share({ title, setModal }) {
   const { enums } = useEnums();
   const { transform } = useTransform();
   const [error, setError] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [collaborationRoom, setCollaborationRoom] = useState(
+    searchParams.get("collab") || nanoid(12),
+  );
   const url = window.location.origin + "/editor?shareId=" + gistId;
+  const collaborationUrl = new URL(window.location.href);
+  collaborationUrl.searchParams.delete("shareId");
+  collaborationUrl.searchParams.set("collab", collaborationRoom);
 
   const diagramToString = useCallback(() => {
     const allCustomTypes = getCustomTypes();
@@ -113,6 +122,21 @@ export default function Share({ title, setModal }) {
       });
   };
 
+  const copyCollaborationLink = () => {
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.set("collab", collaborationRoom);
+    setSearchParams(nextSearchParams, { replace: true });
+
+    navigator.clipboard
+      .writeText(collaborationUrl.toString())
+      .then(() => {
+        Toast.success(t("copied_to_clipboard"));
+      })
+      .catch(() => {
+        Toast.error(t("oops_smth_went_wrong"));
+      });
+  };
+
   if (loading)
     return (
       <div className="text-blue-500 text-center">
@@ -120,6 +144,32 @@ export default function Share({ title, setModal }) {
         <div>{t("loading")}</div>
       </div>
     );
+
+  const collaborationBlock = (
+    <div className="mt-5 border-t pt-4">
+      <div className="font-semibold">{t("collaboration")}</div>
+      <div className="text-xs mt-1 mb-3">{t("collaboration_info")}</div>
+      <Input
+        value={collaborationUrl.toString()}
+        size="large"
+        onChange={() => {}}
+        readOnly
+      />
+      <div className="flex gap-2 mt-3">
+        <Button block onClick={() => setCollaborationRoom(nanoid(12))}>
+          {t("new_room")}
+        </Button>
+        <Button
+          block
+          theme="solid"
+          icon={<IconLink />}
+          onClick={copyCollaborationLink}
+        >
+          {t("copy_collaboration_link")}
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -131,10 +181,11 @@ export default function Share({ title, setModal }) {
           fullMode={false}
         />
       )}
+      {error && collaborationBlock}
       {!error && (
         <>
           <div className="flex gap-3">
-            <Input value={url} size="large" readonly />
+            <Input value={url} size="large" readOnly />
           </div>
           <div className="text-xs mt-2">{t("share_info")}</div>
           <div className="flex gap-2 mt-3">
@@ -145,6 +196,7 @@ export default function Share({ title, setModal }) {
               {t("copy_link")}
             </Button>
           </div>
+          {collaborationBlock}
         </>
       )}
     </div>
