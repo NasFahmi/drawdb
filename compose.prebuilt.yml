@@ -23,6 +23,8 @@ services:
       HOST: 0.0.0.0
       PORT: 5174
     command: sh -c "bun install --production && bun run collaboration"
+    ports:
+      - "${COLLABORATION_PORT:-5174}:5174"
     expose:
       - "5174"
     networks:

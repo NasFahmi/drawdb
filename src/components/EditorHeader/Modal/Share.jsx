@@ -30,6 +30,7 @@ export default function Share({ title, setModal }) {
   const { transform } = useTransform();
   const [error, setError] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const hasShareBackend = Boolean(import.meta.env.VITE_BACKEND_URL);
   const [collaborationRoom, setCollaborationRoom] = useState(
     searchParams.get("collab") || nanoid(12),
   );
@@ -93,6 +94,11 @@ export default function Share({ title, setModal }) {
 
   useEffect(() => {
     const updateOrGenerateLink = async () => {
+      if (!hasShareBackend) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         if (!gistId || gistId === "") {
@@ -109,7 +115,7 @@ export default function Share({ title, setModal }) {
     };
     updateOrGenerateLink();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hasShareBackend]);
 
   const copyLink = () => {
     navigator.clipboard
@@ -173,7 +179,7 @@ export default function Share({ title, setModal }) {
 
   return (
     <div>
-      {error && (
+      {error && hasShareBackend && (
         <Banner
           description={t("oops_smth_went_wrong")}
           type="danger"
@@ -181,8 +187,8 @@ export default function Share({ title, setModal }) {
           fullMode={false}
         />
       )}
-      {error && collaborationBlock}
-      {!error && (
+      {(error || !hasShareBackend) && collaborationBlock}
+      {!error && hasShareBackend && (
         <>
           <div className="flex gap-3">
             <Input value={url} size="large" readOnly />
