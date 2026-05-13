@@ -1,0 +1,54 @@
+services:
+  drawdb:
+    build:
+      context: .
+      dockerfile: Dockerfile.prebuilt
+    image: drawdb:prebuilt
+    container_name: drawdb-app-production
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - drawdb-production
+
+  drawdb-collaboration:
+    image: oven/bun:1-alpine
+    container_name: drawdb-collaboration-production
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - drawdb_collaboration_node_modules:/var/www/html/node_modules
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5174
+    command: sh -c "bun install --production && bun run collaboration"
+    expose:
+      - "5174"
+    networks:
+      - drawdb-production
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: drawdb-nginx-production
+    restart: unless-stopped
+    depends_on:
+      - drawdb
+      - drawdb-collaboration
+    environment:
+      NGINX_SERVER_NAME: ${NGINX_SERVER_NAME:-_}
+      NGINX_WS_SERVER_NAME: ${NGINX_WS_SERVER_NAME:-_}
+      DOLLAR: "$$"
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+    networks:
+      - drawdb-production
+
+networks:
+  drawdb-production:
+    driver: bridge
+
+volumes:
+  drawdb_collaboration_node_modules:
