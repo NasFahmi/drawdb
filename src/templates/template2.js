@@ -1,4 +1,5 @@
 import { Cardinality } from "../data/constants";
+import { createId } from "../utils/id";
 
 export const template2 = {
   tables: [
@@ -352,5 +353,5 @@ export const template2 = {
   description:
     "A Human Resources (HR) schema designed to manage employee and project related information within an organization.",
   custom: 0,
-  templateId: crypto.randomUUID(),
+  templateId: createId(),
 };

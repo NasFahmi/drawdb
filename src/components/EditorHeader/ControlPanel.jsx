@@ -81,6 +81,7 @@ import { socials } from "../../data/socials";
 import { toDBML } from "../../utils/exportAs/dbml";
 import { exportSavedData } from "../../utils/exportSavedData";
 import { nanoid } from "nanoid";
+import { createId } from "../../utils/id";
 import { getTableHeight } from "../../utils/utils";
 import { deleteFromCache, STORAGE_KEY } from "../../utils/cache";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -819,7 +820,7 @@ export default function ControlPanel({ title, setTitle, lastSaved }) {
               notes: notes,
               subjectAreas: areas,
               custom: 1,
-              templateId: crypto.randomUUID(),
+              templateId: createId(),
               ...(databases[database].hasEnums && { enums: enums }),
               ...(databases[database].hasTypes && { types: types }),
             })

@@ -1,4 +1,5 @@
 import { Cardinality } from "../data/constants";
+import { createId } from "../utils/id";
 
 export const template4 = {
   tables: [
@@ -364,5 +365,5 @@ export const template4 = {
   description:
     "A library schema designed to manage the books, genres, reservations, and other aspects of a library system",
   custom: 0,
-  templateId: crypto.randomUUID(),
+  templateId: createId(),
 };

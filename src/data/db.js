@@ -1,5 +1,6 @@
 import Dexie from "dexie";
 import { templateSeeds } from "./seeds";
+import { createId } from "../utils/id";
 
 export const db = new Dexie("drawDB");
 
@@ -11,12 +12,12 @@ db.version(67)
   .upgrade(async (tx) => {
     await tx.diagrams.toCollection().modify((diagram) => {
       if (!diagram.diagramId) {
-        diagram.diagramId = crypto.randomUUID();
+        diagram.diagramId = createId();
       }
     });
     await tx.templates.toCollection().modify((template) => {
       if (!template.templateId) {
-        template.templateId = crypto.randomUUID();
+        template.templateId = createId();
       }
     });
   });

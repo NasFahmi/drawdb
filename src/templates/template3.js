@@ -1,4 +1,5 @@
 import { Cardinality } from "../data/constants";
+import { createId } from "../utils/id";
 
 export const template3 = {
   tables: [
@@ -424,5 +425,5 @@ export const template3 = {
   description:
     "An e-commerce schema designed to manage various aspects of an online store, including products, orders, and customers.",
   custom: 0,
-  templateId: crypto.randomUUID(),
+  templateId: createId(),
 };

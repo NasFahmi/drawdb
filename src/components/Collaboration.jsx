@@ -18,7 +18,7 @@ import {
   useUndoRedo,
 } from "../hooks";
 import { useTranslation } from "react-i18next";
-import { nanoid } from "nanoid";
+import { createId } from "../utils/id";
 
 const SCALAR_KEYS = ["title", "database"];
 const COLLECTIONS = [
@@ -53,7 +53,7 @@ function getCollaborationSocketUrl() {
 }
 
 function getClientId() {
-  return crypto.randomUUID?.() ?? nanoid();
+  return createId();
 }
 
 function getClientColor(clientId) {

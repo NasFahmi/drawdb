@@ -32,6 +32,7 @@ import {
 } from "react-router-dom";
 import { get, SHARE_FILENAME } from "../api/gists";
 import { nanoid } from "nanoid";
+import { createId } from "../utils/id";
 import { mergeCustomTypes } from "../utils/customTypes";
 
 export const IdContext = createContext({
@@ -102,7 +103,7 @@ export default function WorkSpace() {
     }
 
     if (isTemplate || (!loadedDiagramId && !isTemplate && !isDiagram)) {
-      const diagramId = crypto.randomUUID();
+      const diagramId = createId();
       await db.diagrams
         .add({
           diagramId,
