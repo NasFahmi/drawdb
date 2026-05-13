@@ -15,14 +15,32 @@ services:
     networks:
       - drawdb-production
 
+  drawdb-collaboration:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: collaboration
+    image: drawdb-collaboration:production
+    container_name: drawdb-collaboration-production
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5174
+    expose:
+      - "5174"
+    networks:
+      - drawdb-production
+
   nginx:
     image: nginx:stable-alpine
     container_name: drawdb-nginx-production
     restart: unless-stopped
     depends_on:
       - drawdb
+      - drawdb-collaboration
     environment:
       NGINX_SERVER_NAME: ${NGINX_SERVER_NAME:-_}
+      NGINX_WS_SERVER_NAME: ${NGINX_WS_SERVER_NAME:-_}
       DOLLAR: "$$"
     ports:
       - "${NGINX_HTTP_PORT:-80}:80"

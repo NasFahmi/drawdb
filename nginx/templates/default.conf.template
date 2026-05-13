@@ -15,3 +15,20 @@ server {
         proxy_set_header Connection "upgrade";
     }
 }
+
+server {
+    listen 80;
+    server_name ${NGINX_WS_SERVER_NAME};
+
+    location / {
+        proxy_pass http://drawdb-collaboration:5174;
+        proxy_http_version 1.1;
+        proxy_set_header Host ${DOLLAR}host;
+        proxy_set_header X-Real-IP ${DOLLAR}remote_addr;
+        proxy_set_header X-Forwarded-For ${DOLLAR}proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto ${DOLLAR}scheme;
+        proxy_set_header Upgrade ${DOLLAR}http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400;
+    }
+}
