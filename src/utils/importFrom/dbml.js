@@ -31,7 +31,7 @@ export function fromDBML(src) {
         field.default = column.dbdefault?.value ?? "";
         field.check = "";
         field.primary = !!column.pk;
-        field.unique = !!column.pk;
+        field.unique = !!column.unique;
         field.notNull = !!column.not_null;
         field.increment = !!column.increment;
         field.comment = column.note ?? "";
@@ -84,11 +84,11 @@ export function fromDBML(src) {
       relationship.startFieldId = startField.id;
       relationship.id = nanoid();
 
-      relationship.updateConstraint = ref.onDelete
-        ? ref.onDelete[0].toUpperCase() + ref.onDelete.substring(1)
-        : Constraint.NONE;
-      relationship.deleteConstraint = ref.onUpdate
+      relationship.updateConstraint = ref.onUpdate
         ? ref.onUpdate[0].toUpperCase() + ref.onUpdate.substring(1)
+        : Constraint.NONE;
+      relationship.deleteConstraint = ref.onDelete
+        ? ref.onDelete[0].toUpperCase() + ref.onDelete.substring(1)
         : Constraint.NONE;
 
       const startRelation = ref.endpoints[0].relation;
@@ -112,6 +112,7 @@ export function fromDBML(src) {
     for (const schemaEnum of schema.enums) {
       const parsedEnum = {};
 
+      parsedEnum.id = nanoid();
       parsedEnum.name = schemaEnum.name;
       parsedEnum.values = schemaEnum.values.map((x) => x.name);
 

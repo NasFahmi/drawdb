@@ -1,0 +1,20 @@
+services:
+  drawdb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-}
+        VITE_COLLABORATION_URL: ${VITE_COLLABORATION_URL:-}
+    image: drawdb:production
+    container_name: drawdb-production
+    restart: unless-stopped
+    ports:
+      - "${DRAWDB_PORT:-8080}:80"
+    networks:
+      - drawdb-production
+
+networks:
+  drawdb-production:
+    driver: bridge
