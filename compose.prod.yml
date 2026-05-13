@@ -8,10 +8,26 @@ services:
         VITE_BACKEND_URL: ${VITE_BACKEND_URL:-}
         VITE_COLLABORATION_URL: ${VITE_COLLABORATION_URL:-}
     image: drawdb:production
-    container_name: drawdb-production
+    container_name: drawdb-app-production
     restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - drawdb-production
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: drawdb-nginx-production
+    restart: unless-stopped
+    depends_on:
+      - drawdb
+    environment:
+      NGINX_SERVER_NAME: ${NGINX_SERVER_NAME:-_}
+      DOLLAR: "$$"
     ports:
-      - "${DRAWDB_PORT:-8080}:80"
+      - "${NGINX_HTTP_PORT:-80}:80"
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
     networks:
       - drawdb-production
 
